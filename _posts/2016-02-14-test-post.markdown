@@ -1,0 +1,6 @@
+---
+published: true
+title: Test Post
+layout: post
+---
+I would like to test this blog post.
