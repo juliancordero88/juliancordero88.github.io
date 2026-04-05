@@ -430,6 +430,57 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   margin-bottom: 8px;
 }
 
+.product-origin {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gray-light);
+  margin-bottom: 10px;
+}
+
+/* Roast meter */
+.roast-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.roast-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gray-light);
+  flex-shrink: 0;
+}
+.roast-track {
+  flex: 1;
+  height: 3px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.roast-fill {
+  height: 100%;
+  background: var(--black);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.roast-fill--rainbow {
+  background: var(--gradient-rainbow-h);
+}
+.roast-meter--dark .roast-track { background: rgba(255,255,255,0.15); }
+.roast-meter--dark .roast-label,
+.roast-meter--dark .roast-word { color: rgba(255,255,255,0.4); }
+.roast-word {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-light);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .product-flag {
   font-size: 13px;
   color: var(--gray-light);
