@@ -131,8 +131,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .nav-logo-text {
   font-family: var(--font-display);
-  font-size: 22px;
-  letter-spacing: 1px;
+  font-size: 20px;
+  letter-spacing: 2px;
   color: var(--white);
 }
 
@@ -1006,9 +1006,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   flex-wrap: wrap;
 }
 
-.footer-logo {
-  height: 56px;
-  width: auto;
+.footer-wordmark {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--white);
   margin-bottom: 8px;
 }
 
