@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Unicorn Drip Coffee — Specialty-grade, small-batch coffee that's one of a kind. Rare. Bold. Magical.">
+  <meta property="og:title" content="Unicorn Drip Coffee">
+  <meta property="og:description" content="Rare. Bold. Magical. Specialty-grade coffee delivered fresh.">
+  <meta property="og:type" content="website">
+  <title>Unicorn Drip Coffee</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#home" class="nav-logo">
+        <img src="images/unicorn-logo.png" alt="Unicorn Drip Coffee" class="nav-logo-img">
+        <span class="nav-logo-text">Unicorn Drip</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="nav-link">Home</a></li>
+        <li><a href="#shop" class="nav-link">Our Coffee</a></li>
+        <li><a href="#subscriptions" class="nav-link">Subscriptions</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-logo-wrap">
+        <img src="images/unicorn-logo.png" alt="Unicorn Drip Coffee" class="hero-logo">
+      </div>
+      <p class="hero-eyebrow">Specialty Coffee</p>
+      <h1 class="hero-headline">Coffee That's<br><span class="gradient-text">One of a Kind</span></h1>
+      <p class="hero-sub">Specialty-grade. Small-batch. Mythically good.</p>
+      <div class="hero-ctas">
+        <a href="#shop" class="btn btn-rainbow">Shop Coffee</a>
+        <a href="#about" class="btn btn-outline">Our Story</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>scroll</span>
+      <i class="fa-solid fa-chevron-down"></i>
+    </div>
+  </section>
+
+  <!-- MARQUEE STRIP -->
+  <div class="marquee-strip">
+    <div class="marquee-track">
+      <span>SPECIALTY GRADE</span>
+      <span class="dot">·</span>
+      <span>SMALL BATCH</span>
+      <span class="dot">·</span>
+      <span>FRESH ROASTED</span>
+      <span class="dot">·</span>
+      <span>FREE SHIPPING</span>
+      <span class="dot">·</span>
+      <span>RARE FINDS</span>
+      <span class="dot">·</span>
+      <span>SPECIALTY GRADE</span>
+      <span class="dot">·</span>
+      <span>SMALL BATCH</span>
+      <span class="dot">·</span>
+      <span>FRESH ROASTED</span>
+      <span class="dot">·</span>
+      <span>FREE SHIPPING</span>
+      <span class="dot">·</span>
+      <span>RARE FINDS</span>
+      <span class="dot">·</span>
+      <span>SPECIALTY GRADE</span>
+      <span class="dot">·</span>
+      <span>SMALL BATCH</span>
+      <span class="dot">·</span>
+      <span>FRESH ROASTED</span>
+      <span class="dot">·</span>
+      <span>FREE SHIPPING</span>
+      <span class="dot">·</span>
+      <span>RARE FINDS</span>
+      <span class="dot">·</span>
+    </div>
+  </div>
+
+  <!-- SHOP / OUR COFFEE -->
+  <section class="section" id="shop">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Our Coffee</p>
+        <h2 class="section-title">The <span class="gradient-text">Drip</span></h2>
+        <p class="section-sub">Every bag is roasted to order — never sitting on a shelf. Sourced from the world's best specialty farms and roasted in small batches by fourth-generation craftspeople.</p>
+      </div>
+
+      <div class="products-grid">
+
+        <div class="product-card">
+          <div class="product-badge">Best Seller</div>
+          <div class="product-icon">☕</div>
+          <div class="product-flag">🌍 Multi-Origin</div>
+          <h3 class="product-name">The Mythic Blend</h3>
+          <p class="product-roast">Medium Roast</p>
+          <p class="product-notes">Chocolate · Stone Fruit · Brown Sugar</p>
+          <p class="product-desc">Our signature blend — bold and balanced, built for every brew method. The coffee that started it all.</p>
+          <div class="product-footer">
+            <span class="product-price">$22 / 12oz</span>
+            <button class="btn btn-rainbow btn-sm" onclick="openWaitlist()">Join Waitlist</button>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-icon">🌸</div>
+          <div class="product-flag">🇪🇹 Ethiopia</div>
+          <h3 class="product-name">Safari Single Origin</h3>
+          <p class="product-roast">Light Roast</p>
+          <p class="product-notes">Jasmine · Wild Berry · Bright Citrus</p>
+          <p class="product-desc">A bright, floral African gem with the clarity and sweetness of fresh-picked fruit. Exceptional as a pour-over.</p>
+          <div class="product-footer">
+            <span class="product-price">$24 / 12oz</span>
+            <button class="btn btn-rainbow btn-sm" onclick="openWaitlist()">Join Waitlist</button>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-icon">🍑</div>
+          <div class="product-flag">🇸🇻 El Salvador</div>
+          <h3 class="product-name">El Dorado</h3>
+          <p class="product-roast">Medium Roast</p>
+          <p class="product-notes">Brown Sugar · Peach · Toasted Almond</p>
+          <p class="product-desc">Direct-trade from our partners in El Salvador. Smooth, sweet, and impossibly clean — a crowd favorite.</p>
+          <div class="product-footer">
+            <span class="product-price">$23 / 12oz</span>
+            <button class="btn btn-rainbow btn-sm" onclick="openWaitlist()">Join Waitlist</button>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-icon">🌋</div>
+          <div class="product-flag">🇮🇩 Indonesia</div>
+          <h3 class="product-name">Dark Matter</h3>
+          <p class="product-roast">Dark Roast</p>
+          <p class="product-notes">Smoke · Dark Chocolate · Cedar</p>
+          <p class="product-desc">Deep, brooding, and unapologetically bold. For those who like their coffee with attitude. Exceptional espresso.</p>
+          <div class="product-footer">
+            <span class="product-price">$22 / 12oz</span>
+            <button class="btn btn-rainbow btn-sm" onclick="openWaitlist()">Join Waitlist</button>
+          </div>
+        </div>
+
+        <div class="product-card">
+          <div class="product-icon">🌙</div>
+          <div class="product-flag">🌎 Central America</div>
+          <h3 class="product-name">The Legend Decaf</h3>
+          <p class="product-roast">Medium Roast · Decaf</p>
+          <p class="product-notes">Caramel · Hazelnut · Velvet Smooth</p>
+          <p class="product-desc">Proof that decaf doesn't have to be a compromise. All the flavor, none of the jitters. Legends drink this at midnight.</p>
+          <div class="product-footer">
+            <span class="product-price">$23 / 12oz</span>
+            <button class="btn btn-rainbow btn-sm" onclick="openWaitlist()">Join Waitlist</button>
+          </div>
+        </div>
+
+        <div class="product-card product-card--special">
+          <div class="product-badge badge--rainbow">Limited</div>
+          <div class="product-icon">🦄</div>
+          <div class="product-flag">🌐 Seasonal Origin</div>
+          <h3 class="product-name">Roaster's Pick</h3>
+          <p class="product-roast">Rotating Roast</p>
+          <p class="product-notes">Surprise · Discovery · One of a Kind</p>
+          <p class="product-desc">A rotating single-origin selected by our roaster. Different every time. That's the unicorn energy — you never know what rare thing you'll discover next.</p>
+          <div class="product-footer">
+            <span class="product-price">$26 / 12oz</span>
+            <button class="btn btn-rainbow btn-sm" onclick="openWaitlist()">Join Waitlist</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="shop-cta-box">
+        <p class="shop-cta-label">Shop launching soon</p>
+        <h3>Be First to Order</h3>
+        <p>Drop your email and we'll notify you the moment the shop goes live — plus get 15% off your first bag.</p>
+        <form class="inline-form" onsubmit="handleWaitlist(event)">
+          <input type="email" placeholder="your@email.com" required class="form-input">
+          <button type="submit" class="btn btn-rainbow">Notify Me</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSCRIPTIONS -->
+  <section class="section section--dark" id="subscriptions">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow section-eyebrow--light">Subscribe</p>
+        <h2 class="section-title section-title--white">Never Run Out of <span class="gradient-text">Magic</span></h2>
+        <p class="section-sub section-sub--white">Fresh-roasted coffee delivered on your schedule. Cancel anytime. No contracts. Just great coffee.</p>
+      </div>
+
+      <div class="plans-grid">
+
+        <div class="plan-card">
+          <div class="plan-tier">Drip Weekly</div>
+          <div class="plan-price">
+            <span class="plan-amount">$22</span>
+            <span class="plan-period">/ week</span>
+          </div>
+          <p class="plan-size">12oz · Free Shipping</p>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> One 12oz bag per week</li>
+            <li><i class="fa-solid fa-check"></i> Choose your roast level</li>
+            <li><i class="fa-solid fa-check"></i> Free shipping always</li>
+            <li><i class="fa-solid fa-check"></i> Skip or pause anytime</li>
+          </ul>
+          <button class="btn btn-outline-dark btn-block" onclick="openWaitlist()">Join Waitlist</button>
+        </div>
+
+        <div class="plan-card plan-card--featured">
+          <div class="plan-popular">Most Popular</div>
+          <div class="plan-tier">The Unicorn Box</div>
+          <div class="plan-price">
+            <span class="plan-amount">$38</span>
+            <span class="plan-period">/ month</span>
+          </div>
+          <p class="plan-size">2 × 12oz · Curated Selection</p>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> Two curated 12oz bags</li>
+            <li><i class="fa-solid fa-check"></i> We pick the best of the month</li>
+            <li><i class="fa-solid fa-check"></i> Tasting notes included</li>
+            <li><i class="fa-solid fa-check"></i> Free shipping always</li>
+            <li><i class="fa-solid fa-check"></i> Skip or pause anytime</li>
+          </ul>
+          <button class="btn btn-rainbow btn-block" onclick="openWaitlist()">Join Waitlist</button>
+        </div>
+
+        <div class="plan-card">
+          <div class="plan-tier">Legend Status</div>
+          <div class="plan-price">
+            <span class="plan-amount">$65</span>
+            <span class="plan-period">/ month</span>
+          </div>
+          <p class="plan-size">4 × 12oz · Early Access</p>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> Four 12oz bags per month</li>
+            <li><i class="fa-solid fa-check"></i> Early access to Roaster's Pick</li>
+            <li><i class="fa-solid fa-check"></i> Exclusive limited releases</li>
+            <li><i class="fa-solid fa-check"></i> Priority customer support</li>
+            <li><i class="fa-solid fa-check"></i> Free shipping always</li>
+          </ul>
+          <button class="btn btn-outline btn-block" onclick="openWaitlist()">Join Waitlist</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT / THE MAGIC -->
+  <section class="section" id="about">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Why Us</p>
+        <h2 class="section-title">The <span class="gradient-text">Magic</span></h2>
+      </div>
+
+      <div class="magic-grid">
+        <div class="magic-item">
+          <div class="magic-icon" style="color: #ff6b9d;">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          <h3>Fourth-Generation Craft</h3>
+          <p>Our roasting partner Jason Richter is a fourth-generation coffee roaster. That's over a century of knowledge poured into every bag — combined with the most advanced roasting technology available today.</p>
+        </div>
+        <div class="magic-item">
+          <div class="magic-icon" style="color: #c44dff;">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <h3>Freshness Guaranteed</h3>
+          <p>We roast 4–5 days a week. Your coffee ships within hours of roasting — never sitting on a warehouse shelf for months. Fresh is the difference between good coffee and great coffee.</p>
+        </div>
+        <div class="magic-item">
+          <div class="magic-icon" style="color: #4d9fff;">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <h3>Specialty Grade Only</h3>
+          <p>If a bean doesn't hit our flavor threshold, it doesn't get roasted. Period. Every coffee in our lineup has been rigorously cupped and selected for clarity, balance, and exceptional taste.</p>
+        </div>
+        <div class="magic-item">
+          <div class="magic-icon" style="color: #4dffa8;">
+            <i class="fa-solid fa-fire"></i>
+          </div>
+          <h3>Small Batch, Big Flavor</h3>
+          <p>Using the Loring S15 roaster — recirculating hot-air technology that produces clean, consistent batches with remarkable precision. The kind of technology that lets craft and science agree.</p>
+        </div>
+      </div>
+
+      <div class="about-brand">
+        <div class="about-text">
+          <p class="section-eyebrow">Our Story</p>
+          <h2 class="section-title" style="text-align:left;">Rare. Bold. <span class="gradient-text">Magical.</span></h2>
+          <p>Unicorn Drip Coffee was built on a simple idea: the best coffee in the world shouldn't be hard to find. <em>Drip</em> is how we brew it. <em>Unicorn</em> is how rare and special it should feel.</p>
+          <p>We partner exclusively with specialty roasters who share our obsession with quality — because when you pour that first cup in the morning, it should feel like something worth waking up for.</p>
+          <p>No filler. No fluff. Just mythically good coffee, delivered fresh to your door.</p>
+        </div>
+        <div class="about-visual">
+          <div class="about-stat">
+            <span class="stat-number gradient-text">100%</span>
+            <span class="stat-label">Specialty Grade</span>
+          </div>
+          <div class="about-stat">
+            <span class="stat-number gradient-text">4–5x</span>
+            <span class="stat-label">Roasted Per Week</span>
+          </div>
+          <div class="about-stat">
+            <span class="stat-number gradient-text">4th</span>
+            <span class="stat-label">Generation Roaster</span>
+          </div>
+          <div class="about-stat">
+            <span class="stat-number gradient-text">0</span>
+            <span class="stat-label">Compromises</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section section--dark" id="contact">
+    <div class="container container--narrow">
+      <div class="section-header">
+        <p class="section-eyebrow section-eyebrow--light">Get in Touch</p>
+        <h2 class="section-title section-title--white">Let's <span class="gradient-text">Talk Coffee</span></h2>
+        <p class="section-sub section-sub--white">Questions, wholesale inquiries, or just want to say hello — we'd love to hear from you.</p>
+      </div>
+
+      <form class="contact-form" onsubmit="handleContact(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="contactName">Name</label>
+            <input type="text" id="contactName" name="name" class="form-input" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contactEmail">Email</label>
+            <input type="email" id="contactEmail" name="email" class="form-input" placeholder="your@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contactMessage">Message</label>
+          <textarea id="contactMessage" name="message" class="form-input form-textarea" placeholder="Tell us what's on your mind..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-rainbow btn-block">Send Message</button>
+        <p class="form-note" id="contactNote"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <img src="images/unicorn-logo.png" alt="Unicorn Drip Coffee" class="footer-logo">
+          <p class="footer-tagline">Rare. Bold. Magical.</p>
+        </div>
+        <div class="footer-nav">
+          <a href="#home">Home</a>
+          <a href="#shop">Our Coffee</a>
+          <a href="#subscriptions">Subscriptions</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="#" aria-label="Twitter / X"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 Unicorn Drip Coffee. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WAITLIST MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeWaitlist()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeWaitlist()">&times;</button>
+      <div class="modal-icon">🦄</div>
+      <h3 class="modal-title">Join the <span class="gradient-text">Waitlist</span></h3>
+      <p class="modal-sub">Be the first to know when our shop goes live. Get 15% off your first order.</p>
+      <form class="modal-form" onsubmit="handleModalWaitlist(event)">
+        <input type="email" placeholder="your@email.com" required class="form-input">
+        <button type="submit" class="btn btn-rainbow btn-block">Count Me In</button>
+      </form>
+      <p class="modal-note" id="modalNote"></p>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
