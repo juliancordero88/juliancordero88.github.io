@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Send, Loader2, Copy, Check } from "lucide-react"
+import { Send, Loader2, Copy, Check, History, X, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { AgentId } from "@/types/database"
 
@@ -9,6 +9,12 @@ interface ChatMessage {
   id: string
   role: "user" | "assistant"
   content: string
+}
+
+interface ChatSession {
+  id: string
+  title: string | null
+  created_at: string
 }
 
 interface AgentChatProps {
@@ -28,7 +34,6 @@ function genId() { return `msg-${++msgCounter}-${Date.now()}` }
 export function AgentChat({
   agentId,
   agentName,
-  sessionId,
   documentIds,
   useGlobalRAG,
   clientId,
@@ -42,9 +47,85 @@ export function AgentChat({
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
+  // Session management
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
+  const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [showHistory, setShowHistory] = useState(false)
+  const [loadingSession, setLoadingSession] = useState(false)
+
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  // Load recent sessions for this agent
+  const loadSessions = useCallback(async () => {
+    const res = await fetch(`/api/sessions?agent_id=${agentId}&limit=15`)
+    if (res.ok) {
+      const data = await res.json()
+      setSessions(data.sessions ?? [])
+    }
+  }, [agentId])
+
+  useEffect(() => { loadSessions() }, [loadSessions])
+
+  // Create a new session (called on first message)
+  async function ensureSession(): Promise<string> {
+    if (currentSessionId) return currentSessionId
+    const res = await fetch("/api/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agent_id: agentId, client_id: clientId ?? null, matter_id: matterId ?? null }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setCurrentSessionId(data.session.id)
+      return data.session.id
+    }
+    return ""
+  }
+
+  // Load a past session
+  async function loadSession(session: ChatSession) {
+    setLoadingSession(true)
+    setShowHistory(false)
+    const res = await fetch(`/api/sessions/${session.id}/messages`)
+    if (res.ok) {
+      const data = await res.json()
+      setMessages(
+        (data.messages ?? []).map((m: { id: string; role: "user" | "assistant"; content: string }) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+        }))
+      )
+      setCurrentSessionId(session.id)
+    }
+    setLoadingSession(false)
+  }
+
+  function newChat() {
+    setMessages([])
+    setCurrentSessionId(null)
+    setInput("")
+    setShowHistory(false)
+  }
+
+  // Persist messages to DB
+  async function persistMessages(sessionId: string, userText: string, assistantText: string) {
+    if (!sessionId) return
+    await fetch(`/api/sessions/${sessionId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: "user", content: userText }),
+    })
+    await fetch(`/api/sessions/${sessionId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: "assistant", content: assistantText }),
+    })
+    // Refresh session list to show updated titles
+    loadSessions()
+  }
 
   const sendMessage = useCallback(async (userText: string) => {
     if (!userText.trim() || isLoading) return
@@ -56,6 +137,9 @@ export function AgentChat({
     setIsLoading(true)
 
     abortRef.current = new AbortController()
+
+    // Get or create session
+    const sessionId = await ensureSession()
 
     try {
       const response = await fetch(`/api/agents/${agentId}`, {
@@ -88,6 +172,9 @@ export function AgentChat({
           prev.map((m) => m.id === assistantId ? { ...m, content: accumulated } : m)
         )
       }
+
+      // Persist to DB async
+      persistMessages(sessionId, userText, accumulated)
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         setMessages((prev) =>
@@ -101,7 +188,8 @@ export function AgentChat({
     } finally {
       setIsLoading(false)
     }
-  }, [agentId, messages, sessionId, documentIds, useGlobalRAG, clientId, matterId, isLoading])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentId, messages, documentIds, useGlobalRAG, clientId, matterId, isLoading, currentSessionId])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -116,9 +204,56 @@ export function AgentChat({
 
   return (
     <div className="flex flex-col h-full">
+      {/* History panel overlay */}
+      {showHistory && (
+        <div className="absolute inset-0 z-20 bg-gray-900/95 flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-800">
+            <h3 className="text-sm font-semibold text-white">Chat History</h3>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={newChat}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> New Chat
+              </button>
+              <button onClick={() => setShowHistory(false)} className="p-1.5 text-gray-500 hover:text-gray-300">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
+            {sessions.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-8">No previous chats with {agentName}.</p>
+            ) : (
+              sessions.map((session) => (
+                <button
+                  key={session.id}
+                  onClick={() => loadSession(session)}
+                  className={cn(
+                    "w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors",
+                    session.id === currentSessionId
+                      ? "bg-blue-600/15 text-blue-300"
+                      : "text-gray-300 hover:bg-gray-800"
+                  )}
+                >
+                  <p className="font-medium truncate">{session.title ?? `Chat ${new Date(session.created_at).toLocaleDateString()}`}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{new Date(session.created_at).toLocaleString()}</p>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.length === 0 && (
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 relative">
+        {loadingSession && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+          </div>
+        )}
+
+        {!loadingSession && messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center py-12">
             <div className="w-12 h-12 bg-blue-600/20 rounded-xl flex items-center justify-center mb-3">
               <span className="text-blue-400 font-bold text-lg">
@@ -131,6 +266,15 @@ export function AgentChat({
             <p className="text-gray-600 text-xs mt-1">
               Shift+Enter for new line · Enter to send
             </p>
+            {sessions.length > 0 && (
+              <button
+                onClick={() => setShowHistory(true)}
+                className="mt-3 flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                <History className="w-3.5 h-3.5" />
+                View {sessions.length} previous chat{sessions.length !== 1 ? "s" : ""}
+              </button>
+            )}
           </div>
         )}
 
@@ -188,6 +332,19 @@ export function AgentChat({
         onSubmit={handleSubmit}
         className="flex items-end gap-2 px-4 py-4 border-t border-gray-800"
       >
+        <button
+          type="button"
+          onClick={() => setShowHistory(!showHistory)}
+          className={cn(
+            "flex items-center justify-center w-10 h-10 rounded-xl transition-colors shrink-0",
+            showHistory
+              ? "bg-blue-600/20 text-blue-400"
+              : "bg-gray-800 hover:bg-gray-700 text-gray-400"
+          )}
+          title="Chat history"
+        >
+          <History className="w-4 h-4" />
+        </button>
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
