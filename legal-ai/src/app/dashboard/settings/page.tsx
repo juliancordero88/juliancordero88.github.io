@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import {
   CheckCircle2, AlertCircle, Loader2,
   Link2, Globe, Database, Mail, CreditCard, FileSignature,
-  BarChart3, Users, Calendar, BookOpen, Briefcase,
+  BarChart3, Users, Calendar, BookOpen, Briefcase, X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -36,34 +36,80 @@ interface IntegrationConfig {
   tier: number
   category: string
   authType: "oauth" | "api_key"
-  comingSoon?: boolean
+  keyLabel?: string
+  keyPlaceholder?: string
+  oauthNote?: string
 }
 
 const INTEGRATIONS: IntegrationConfig[] = [
-  { id: "google", name: "Google Workspace", description: "Gmail, Calendar, Drive", icon: Globe, tier: 1, category: "Productivity", authType: "oauth" },
-  { id: "clio", name: "Clio", description: "Practice management & billing", icon: Briefcase, tier: 1, category: "Practice Management", authType: "oauth" },
-  { id: "lawpay", name: "LawPay", description: "IOLTA-compliant payments", icon: CreditCard, tier: 1, category: "Payments", authType: "api_key" },
-  { id: "stripe", name: "Stripe", description: "Flat fee invoices & subscriptions", icon: CreditCard, tier: 1, category: "Payments", authType: "api_key" },
-  { id: "docusign", name: "DocuSign", description: "E-signatures for agreements", icon: FileSignature, tier: 1, category: "E-Signature", authType: "oauth" },
-  { id: "hubspot", name: "HubSpot", description: "CRM & marketing pipeline", icon: Users, tier: 2, category: "Marketing", authType: "oauth" },
-  { id: "notion", name: "Notion", description: "Sync pages as skill files", icon: BookOpen, tier: 2, category: "Knowledge", authType: "api_key" },
-  { id: "quickbooks", name: "QuickBooks", description: "Accounting sync", icon: BarChart3, tier: 2, category: "Accounting", authType: "oauth" },
-  { id: "calendly", name: "Calendly", description: "Consultation booking", icon: Calendar, tier: 2, category: "Scheduling", authType: "api_key" },
-  { id: "casetext", name: "Casetext", description: "Legal research database", icon: Database, tier: 3, category: "Legal Research", authType: "api_key", comingSoon: true },
-  { id: "pacer", name: "PACER", description: "Federal court filings", icon: FileSignature, tier: 3, category: "Court Filing", authType: "api_key", comingSoon: true },
-  { id: "slack", name: "Slack", description: "Team notifications", icon: Mail, tier: 3, category: "Communication", authType: "oauth", comingSoon: true },
+  {
+    id: "google", name: "Google Workspace", description: "Gmail, Calendar, Drive",
+    icon: Globe, tier: 1, category: "Productivity", authType: "oauth",
+    oauthNote: "OAuth 2.0 flow — coming in next release",
+  },
+  {
+    id: "clio", name: "Clio", description: "Practice management & billing",
+    icon: Briefcase, tier: 1, category: "Practice Management", authType: "oauth",
+    oauthNote: "OAuth 2.0 flow — coming in next release",
+  },
+  {
+    id: "lawpay", name: "LawPay", description: "IOLTA-compliant payments",
+    icon: CreditCard, tier: 1, category: "Payments", authType: "api_key",
+    keyLabel: "LawPay API Key", keyPlaceholder: "lp_live_...",
+  },
+  {
+    id: "stripe", name: "Stripe", description: "Flat fee invoices & subscriptions",
+    icon: CreditCard, tier: 1, category: "Payments", authType: "api_key",
+    keyLabel: "Stripe Secret Key", keyPlaceholder: "sk_live_...",
+  },
+  {
+    id: "docusign", name: "DocuSign", description: "E-signatures for agreements",
+    icon: FileSignature, tier: 1, category: "E-Signature", authType: "oauth",
+    oauthNote: "OAuth 2.0 flow — coming in next release",
+  },
+  {
+    id: "hubspot", name: "HubSpot", description: "CRM & marketing pipeline",
+    icon: Users, tier: 2, category: "Marketing", authType: "oauth",
+    oauthNote: "OAuth 2.0 flow — coming in next release",
+  },
+  {
+    id: "notion", name: "Notion", description: "Sync pages as skill files",
+    icon: BookOpen, tier: 2, category: "Knowledge", authType: "api_key",
+    keyLabel: "Notion Integration Token", keyPlaceholder: "secret_...",
+  },
+  {
+    id: "quickbooks", name: "QuickBooks", description: "Accounting sync",
+    icon: BarChart3, tier: 2, category: "Accounting", authType: "oauth",
+    oauthNote: "OAuth 2.0 flow — coming in next release",
+  },
+  {
+    id: "calendly", name: "Calendly", description: "Consultation booking",
+    icon: Calendar, tier: 2, category: "Scheduling", authType: "api_key",
+    keyLabel: "Calendly Personal Access Token", keyPlaceholder: "eyJh...",
+  },
+  {
+    id: "casetext", name: "Casetext", description: "Legal research database",
+    icon: Database, tier: 3, category: "Legal Research", authType: "api_key",
+    keyLabel: "Casetext API Key", keyPlaceholder: "",
+  },
+  {
+    id: "pacer", name: "PACER", description: "Federal court filings",
+    icon: FileSignature, tier: 3, category: "Court Filing", authType: "api_key",
+    keyLabel: "PACER API Key", keyPlaceholder: "",
+  },
+  {
+    id: "slack", name: "Slack", description: "Team notifications",
+    icon: Mail, tier: 3, category: "Communication", authType: "oauth",
+    oauthNote: "OAuth 2.0 flow — coming in next release",
+  },
 ]
 
-function ApiKeyCheck({ name, envKey }: { name: string; envKey: string }) {
-  const [status, setStatus] = useState<"checking" | "ok" | "missing">("checking")
-
-  useEffect(() => {
-    // Check by attempting a lightweight API call that requires the key
-    // Since we can't read env from client, just show a placeholder check
-    setTimeout(() => {
-      setStatus(Math.random() > 0.3 ? "ok" : "missing")
-    }, 500 + Math.random() * 500)
-  }, [])
+function ApiKeyCheck({ name, envKey, statuses }: {
+  name: string
+  envKey: string
+  statuses: Record<string, boolean> | null
+}) {
+  const status = statuses === null ? "checking" : (statuses[envKey] ? "ok" : "missing")
 
   return (
     <div className="flex items-center justify-between py-2.5 border-b border-gray-800 last:border-0">
@@ -86,10 +132,133 @@ function ApiKeyCheck({ name, envKey }: { name: string; envKey: string }) {
   )
 }
 
+function IntegrationCard({
+  integration,
+  connected,
+  onConnect,
+  onDisconnect,
+}: {
+  integration: IntegrationConfig
+  connected: boolean
+  onConnect: (provider: string, apiKey: string) => Promise<void>
+  onDisconnect: (provider: string) => Promise<void>
+}) {
+  const Icon = integration.icon
+  const [showModal, setShowModal] = useState(false)
+  const [keyValue, setKeyValue] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [disconnecting, setDisconnecting] = useState(false)
+
+  async function handleSave() {
+    if (!keyValue.trim()) return
+    setSaving(true)
+    await onConnect(integration.id, keyValue.trim())
+    setSaving(false)
+    setShowModal(false)
+    setKeyValue("")
+  }
+
+  async function handleDisconnect() {
+    setDisconnecting(true)
+    await onDisconnect(integration.id)
+    setDisconnecting(false)
+  }
+
+  const isOAuth = integration.authType === "oauth"
+
+  return (
+    <>
+      <div className="flex items-center gap-4 px-4 py-3.5 bg-gray-800/60 border border-gray-700/50 rounded-xl">
+        <div className="flex items-center justify-center w-10 h-10 bg-gray-700 rounded-xl shrink-0">
+          <Icon className="w-5 h-5 text-gray-300" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-medium text-white">{integration.name}</p>
+            <span className="text-xs text-gray-600">{integration.category}</span>
+          </div>
+          <p className="text-xs text-gray-500">{integration.description}</p>
+        </div>
+
+        {isOAuth ? (
+          <span className="text-xs text-gray-500 px-2.5 py-1 bg-gray-700/50 rounded-lg whitespace-nowrap">
+            OAuth — soon
+          </span>
+        ) : connected ? (
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1 text-xs text-green-400 whitespace-nowrap">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Connected
+            </span>
+            <button
+              onClick={handleDisconnect}
+              disabled={disconnecting}
+              className="text-xs text-gray-500 hover:text-gray-300 px-2 py-1 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              {disconnecting ? <Loader2 className="w-3 h-3 animate-spin" /> : "Disconnect"}
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+          >
+            <Link2 className="w-3 h-3" />
+            Add Key
+          </button>
+        )}
+      </div>
+
+      {/* API Key Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-semibold">{integration.name}</h3>
+              <button onClick={() => { setShowModal(false); setKeyValue("") }} className="text-gray-400 hover:text-gray-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              Your key is stored securely in your database. It is never sent to us or exposed in the browser.
+            </p>
+            <label className="block text-xs text-gray-400 mb-1.5">{integration.keyLabel}</label>
+            <input
+              type="password"
+              value={keyValue}
+              onChange={(e) => setKeyValue(e.target.value)}
+              placeholder={integration.keyPlaceholder}
+              onKeyDown={(e) => e.key === "Enter" && handleSave()}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => { setShowModal(false); setKeyValue("") }}
+                className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !keyValue.trim()}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Save Key
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 export default function SettingsPage() {
   const [usage, setUsage] = useState<UsageData | null>(null)
   const [loadingUsage, setLoadingUsage] = useState(true)
   const [tab, setTab] = useState<"overview" | "integrations" | "api-keys">("overview")
+  const [healthStatuses, setHealthStatuses] = useState<Record<string, boolean> | null>(null)
+  const [connectedProviders, setConnectedProviders] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetch("/api/usage")
@@ -98,9 +267,54 @@ export default function SettingsPage() {
       .catch(() => setLoadingUsage(false))
   }, [])
 
-  const maxCost = usage ? Math.max(...Object.values(usage.byAgent).map((a) => a.cost_usd), 0.001) : 0.001
+  useEffect(() => {
+    if (tab === "api-keys" && healthStatuses === null) {
+      fetch("/api/health")
+        .then((r) => r.json())
+        .then(setHealthStatuses)
+        .catch(() => setHealthStatuses({}))
+    }
+  }, [tab, healthStatuses])
 
-  // Build daily chart data (last 14 days)
+  const loadIntegrations = useCallback(() => {
+    fetch("/api/integrations")
+      .then((r) => r.json())
+      .then((d) => {
+        const connected = new Set<string>(
+          (d.integrations ?? []).filter((i: { enabled: boolean }) => i.enabled).map((i: { provider: string }) => i.provider)
+        )
+        setConnectedProviders(connected)
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (tab === "integrations") loadIntegrations()
+  }, [tab, loadIntegrations])
+
+  async function handleConnect(provider: string, apiKey: string) {
+    await fetch("/api/integrations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider, api_key: apiKey }),
+    })
+    setConnectedProviders((prev) => new Set([...prev, provider]))
+  }
+
+  async function handleDisconnect(provider: string) {
+    await fetch("/api/integrations", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider }),
+    })
+    setConnectedProviders((prev) => {
+      const next = new Set(prev)
+      next.delete(provider)
+      return next
+    })
+  }
+
+  const maxCost = usage ? Math.max(...Object.values(usage.byAgent).map((a) => a.cost_usd), 0.001) : 0.001
   const chartDays = Array.from({ length: 14 }, (_, i) => {
     const d = new Date(Date.now() - (13 - i) * 86400000)
     return d.toISOString().slice(0, 10)
@@ -134,9 +348,9 @@ export default function SettingsPage() {
         ))}
       </div>
 
+      {/* Overview Tab */}
       {tab === "overview" && (
         <div className="space-y-6">
-          {/* 30-day summary */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
               <p className="text-xs text-gray-500 mb-1">30-Day AI Cost</p>
@@ -168,7 +382,6 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Cost by agent */}
           <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-4">Cost by Agent (30 days)</h2>
             {loadingUsage ? (
@@ -205,7 +418,6 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* Platform info */}
           <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-white mb-3">Platform</h2>
             <div className="space-y-2 text-sm">
@@ -230,111 +442,64 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* Integrations Tab */}
       {tab === "integrations" && (
-        <div>
-          {/* Tier 1 */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-0.5 bg-blue-600/20 text-blue-400 text-xs font-medium rounded-full">Tier 1</span>
-              <span className="text-xs text-gray-500">High-impact — build first</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3">
-              {INTEGRATIONS.filter((i) => i.tier === 1).map((integration) => (
-                <IntegrationCard key={integration.id} integration={integration} />
-              ))}
-            </div>
+        <div className="space-y-6">
+          <div className="bg-yellow-900/20 border border-yellow-700/40 rounded-xl px-4 py-3 text-xs text-yellow-300">
+            <strong>OAuth integrations</strong> (Google, Clio, DocuSign, HubSpot, QuickBooks) require a full OAuth 2.0 flow that is not yet implemented.
+            API key integrations (LawPay, Stripe, Notion, Calendly) are active now — click <strong>Add Key</strong> to connect them.
           </div>
 
-          {/* Tier 2 */}
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-0.5 bg-yellow-600/20 text-yellow-400 text-xs font-medium rounded-full">Tier 2</span>
-              <span className="text-xs text-gray-500">Build soon</span>
+          {[1, 2, 3].map((tier) => (
+            <div key={tier}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className={cn(
+                  "px-2 py-0.5 text-xs font-medium rounded-full",
+                  tier === 1 ? "bg-blue-600/20 text-blue-400" : tier === 2 ? "bg-yellow-600/20 text-yellow-400" : "bg-gray-600/20 text-gray-400"
+                )}>
+                  Tier {tier}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {tier === 1 ? "High-impact" : tier === 2 ? "Build soon" : "Coming later"}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                {INTEGRATIONS.filter((i) => i.tier === tier).map((integration) => (
+                  <IntegrationCard
+                    key={integration.id}
+                    integration={integration}
+                    connected={connectedProviders.has(integration.id)}
+                    onConnect={handleConnect}
+                    onDisconnect={handleDisconnect}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-1 gap-3">
-              {INTEGRATIONS.filter((i) => i.tier === 2).map((integration) => (
-                <IntegrationCard key={integration.id} integration={integration} />
-              ))}
-            </div>
-          </div>
-
-          {/* Tier 3 */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-0.5 bg-gray-600/20 text-gray-400 text-xs font-medium rounded-full">Tier 3</span>
-              <span className="text-xs text-gray-500">Coming soon</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3">
-              {INTEGRATIONS.filter((i) => i.tier === 3).map((integration) => (
-                <IntegrationCard key={integration.id} integration={integration} />
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
+      {/* API Keys Tab */}
       {tab === "api-keys" && (
         <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-4">API Key Health Check</h2>
-          <p className="text-xs text-gray-500 mb-4">Set these in your Vercel environment variables or .env.local</p>
-          <ApiKeyCheck name="Anthropic (Claude)" envKey="ANTHROPIC_API_KEY" />
-          <ApiKeyCheck name="OpenAI (GPT-4o, Embeddings)" envKey="OPENAI_API_KEY" />
-          <ApiKeyCheck name="Google AI (Gemini)" envKey="GOOGLE_AI_API_KEY" />
-          <ApiKeyCheck name="Supabase URL" envKey="NEXT_PUBLIC_SUPABASE_URL" />
-          <ApiKeyCheck name="Supabase Anon Key" envKey="NEXT_PUBLIC_SUPABASE_ANON_KEY" />
-          <ApiKeyCheck name="Supabase Service Role" envKey="SUPABASE_SERVICE_ROLE_KEY" />
-          <ApiKeyCheck name="Telegram Bot Token" envKey="TELEGRAM_BOT_TOKEN" />
-          <ApiKeyCheck name="Resend (Email)" envKey="RESEND_API_KEY" />
-        </div>
-      )}
-    </div>
-  )
-}
-
-function IntegrationCard({ integration }: { integration: IntegrationConfig }) {
-  const Icon = integration.icon
-  const [connected, setConnected] = useState(false)
-
-  return (
-    <div className={cn(
-      "flex items-center gap-4 px-4 py-3.5 bg-gray-800/60 border border-gray-700/50 rounded-xl",
-      integration.comingSoon && "opacity-50"
-    )}>
-      <div className="flex items-center justify-center w-10 h-10 bg-gray-700 rounded-xl shrink-0">
-        <Icon className="w-5 h-5 text-gray-300" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-white">{integration.name}</p>
-          <span className="text-xs text-gray-600">{integration.category}</span>
-          {integration.authType === "api_key" && (
-            <span className="text-xs text-gray-600">· API Key</span>
+          <h2 className="text-sm font-semibold text-white mb-1">API Key Health Check</h2>
+          <p className="text-xs text-gray-500 mb-4">
+            Set these in your Vercel environment variables. Agents will fail silently if keys are missing.
+          </p>
+          <ApiKeyCheck name="Anthropic (Claude agents)" envKey="ANTHROPIC_API_KEY" statuses={healthStatuses} />
+          <ApiKeyCheck name="OpenAI (GPT-4o + embeddings)" envKey="OPENAI_API_KEY" statuses={healthStatuses} />
+          <ApiKeyCheck name="Google AI (Gemini/Intake)" envKey="GOOGLE_AI_API_KEY" statuses={healthStatuses} />
+          <ApiKeyCheck name="Supabase URL" envKey="NEXT_PUBLIC_SUPABASE_URL" statuses={healthStatuses} />
+          <ApiKeyCheck name="Supabase Anon Key" envKey="NEXT_PUBLIC_SUPABASE_ANON_KEY" statuses={healthStatuses} />
+          <ApiKeyCheck name="Supabase Service Role" envKey="SUPABASE_SERVICE_ROLE_KEY" statuses={healthStatuses} />
+          <ApiKeyCheck name="Telegram Bot Token" envKey="TELEGRAM_BOT_TOKEN" statuses={healthStatuses} />
+          <ApiKeyCheck name="Resend (Email)" envKey="RESEND_API_KEY" statuses={healthStatuses} />
+          {healthStatuses !== null && Object.values(healthStatuses).some((v) => !v) && (
+            <div className="mt-4 p-3 bg-red-900/20 border border-red-700/40 rounded-lg text-xs text-red-300">
+              Missing keys will cause agent failures. Add them in your Vercel project under Settings → Environment Variables, then redeploy.
+            </div>
           )}
         </div>
-        <p className="text-xs text-gray-500">{integration.description}</p>
-      </div>
-      {integration.comingSoon ? (
-        <span className="text-xs text-gray-600 font-medium px-2 py-1 bg-gray-700/50 rounded-lg">Soon</span>
-      ) : connected ? (
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1 text-xs text-green-400">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Connected
-          </span>
-          <button
-            onClick={() => setConnected(false)}
-            className="text-xs text-gray-500 hover:text-gray-300 px-2 py-1 rounded-lg hover:bg-gray-700 transition-colors"
-          >
-            Disconnect
-          </button>
-        </div>
-      ) : (
-        <button
-          onClick={() => setConnected(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-medium rounded-lg transition-colors"
-        >
-          <Link2 className="w-3 h-3" />
-          Connect
-        </button>
       )}
     </div>
   )
