@@ -1,5 +1,8 @@
 import { Sidebar } from "@/components/layout/Sidebar"
 
+// Never pre-render dashboard routes at build time — they require auth
+export const dynamic = "force-dynamic"
+
 export default function DashboardLayout({
   children,
 }: {

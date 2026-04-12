@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+// This app requires auth — never pre-render any route at build time
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "LexOS — AI Law Firm Platform",
   description: "AI-powered multi-agent platform for legal practice management",
