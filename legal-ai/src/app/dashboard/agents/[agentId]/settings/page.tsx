@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { DEFAULT_AGENT_CONFIGS } from "@/lib/agents/agentRegistry"
+import { DEFAULT_AGENT_CONFIGS } from "@/lib/agents/agentConfigs"
 import { MODEL_CATALOG } from "@/lib/models"
 import type { AgentId, AgentConfig, SkillFile } from "@/types/database"
 import { ArrowLeft, Save, Loader2 } from "lucide-react"

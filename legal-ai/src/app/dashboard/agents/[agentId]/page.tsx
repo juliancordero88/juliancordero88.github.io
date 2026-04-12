@@ -1,5 +1,5 @@
 import { AgentChat } from "@/components/agents/AgentChat"
-import { DEFAULT_AGENT_CONFIGS } from "@/lib/agents/agentRegistry"
+import { DEFAULT_AGENT_CONFIGS } from "@/lib/agents/agentConfigs"
 import type { AgentId } from "@/types/database"
 import Link from "next/link"
 import { Settings, ArrowLeft } from "lucide-react"
