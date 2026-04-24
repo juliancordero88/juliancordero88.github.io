@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trademark Clearance Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Nav ──────────────────────────────────────────────────── -->
+  <nav>
+    <div>
+      <span class="nav-logo gradient-text">TRADEMARK ENGINE</span>
+      <span class="nav-badge">v1.0</span>
+    </div>
+    <div class="nav-links">
+      <a href="#search">Search</a>
+      <a href="#results">Results</a>
+      <a href="#common-law">Common Law</a>
+      <a id="docsLink" href="#" target="_blank" rel="noopener">API Docs ↗</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero + Search Form ────────────────────────────────────── -->
+  <section class="hero" id="search">
+    <p class="hero-eyebrow">Powered by DuPont Factor Analysis</p>
+    <h1 class="gradient-text">TRADEMARK<br/>CLEARANCE ENGINE</h1>
+    <p>Phonetic · Visual · Conceptual similarity scoring against USPTO + EUIPO databases with common-law presence checking.</p>
+
+    <div class="search-card">
+      <form id="searchForm" onsubmit="return false;">
+
+        <div class="form-row">
+          <div class="form-group" style="flex:2; min-width:240px;">
+            <label for="markInput">Proposed Mark</label>
+            <input
+              id="markInput"
+              type="text"
+              placeholder="e.g. SOLARSHINE"
+              maxlength="200"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+          <div class="form-group">
+            <label for="classInput">Nice Classes</label>
+            <input
+              id="classInput"
+              type="text"
+              placeholder="e.g. 9, 42"
+              maxlength="100"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group" style="flex:1;">
+            <label for="gsInput">Goods / Services (optional)</label>
+            <input
+              id="gsInput"
+              type="text"
+              placeholder="e.g. solar energy software"
+              maxlength="400"
+            />
+          </div>
+        </div>
+
+        <div class="form-checkboxes">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkUSPTO" checked /> USPTO
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkEUIPO" checked /> EUIPO
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkCommonLaw" checked /> Common Law
+          </label>
+        </div>
+
+        <button class="btn-primary" id="searchBtn" type="submit" onclick="runSearch()">
+          RUN CLEARANCE SEARCH
+        </button>
+
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Results ───────────────────────────────────────────────── -->
+  <div class="section" id="results" style="display:none;">
+
+    <div class="spinner" id="spinner"></div>
+    <div class="error-banner" id="errorBanner"></div>
+    <div class="warnings-box" id="warningsBox"><ul id="warningsList"></ul></div>
+
+    <!-- Risk summary -->
+    <div class="risk-banner" id="riskBanner" style="display:none;">
+      <div class="risk-badge" id="riskBadge">—</div>
+      <div class="risk-details">
+        <h3 id="riskHeading">—</h3>
+        <p id="riskSubtext">—</p>
+      </div>
+    </div>
+
+    <!-- DuPont factors -->
+    <div id="dupontSection" style="display:none;">
+      <div class="section-title">DuPont Factor Analysis</div>
+      <p class="section-sub">Automated factors — Factors 7, 10 &amp; 11 require attorney review.</p>
+      <div class="dupont-grid" id="dupontGrid"></div>
+    </div>
+
+    <!-- Conflict list -->
+    <div id="conflictsSection" style="display:none;">
+      <div class="section-title">Potential Conflicts <span id="conflictCount" style="color:var(--gray-light);font-size:1rem;"></span></div>
+      <p class="section-sub">Sorted by combined risk score (highest first).</p>
+      <div class="conflicts-list" id="conflictsList"></div>
+    </div>
+
+  </div>
+
+  <!-- ── Common Law ────────────────────────────────────────────── -->
+  <div class="section" id="common-law" style="display:none;">
+    <div class="section-title">Common Law Presence</div>
+    <p class="section-sub">Domain registrations, company filings, and social handle availability.</p>
+
+    <div id="domainsSection" style="display:none;">
+      <p class="section-sub" style="margin-top:16px;margin-bottom:10px;color:var(--purple);text-transform:uppercase;font-size:0.75rem;letter-spacing:2px;">Domains</p>
+      <div class="cl-grid" id="domainsGrid"></div>
+    </div>
+
+    <div id="companiesSection" style="display:none;">
+      <p class="section-sub" style="margin-top:16px;margin-bottom:10px;color:var(--purple);text-transform:uppercase;font-size:0.75rem;letter-spacing:2px;">Company Registrations</p>
+      <div class="cl-grid" id="companiesGrid"></div>
+    </div>
+
+    <div id="socialSection" style="display:none;">
+      <p class="section-sub" style="margin-top:16px;margin-bottom:10px;color:var(--purple);text-transform:uppercase;font-size:0.75rem;letter-spacing:2px;">Social Handles</p>
+      <div class="cl-grid" id="socialGrid"></div>
+    </div>
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────── -->
+  <footer>
+    <p>Trademark Clearance Engine · Built by <a href="/">Julian Cordero</a> · For informational use only — not legal advice.</p>
+    <p style="margin-top:6px;">Data sources: USPTO (via Marker API / RapidAPI) · EUIPO · OpenCorporates · RDAP</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
